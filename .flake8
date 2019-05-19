@@ -1,0 +1,8 @@
+[flake8]
+exclude = 
+    migrations,
+    __pycache__,
+    .git,
+    config,
+    .vscode
+max-complexity = 11

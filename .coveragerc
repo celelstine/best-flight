@@ -1,0 +1,12 @@
+[run]
+branch=True
+source=.
+omit=
+    *migrations*
+
+[html]
+directory=htmlcov
+
+[report]
+show_missing=True
+exclude_lines=pragma: no cover
