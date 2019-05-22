@@ -17,8 +17,7 @@ branches:
 services:
   - postgresql
 
-install: pip install pipenv
+install: pip install pipenv 
 
 script:
-  - pipenv shell
   - make travis_test

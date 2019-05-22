@@ -1,6 +1,6 @@
 [run]
 branch=True
-source=bestflightApp, bestflightUser
+source=bestflightApp
 omit=
     *migrations*
 
