@@ -19,7 +19,6 @@ coverage:
 
 travis_test:
 	pipenv install --dev
-	pipenv shell
 	flake8 .
 	coverage erase
 	coverage run manage.py test --verbosity 2
