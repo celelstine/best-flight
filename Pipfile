@@ -8,10 +8,16 @@ flake8 = "*"
 coverage = "*"
 
 [packages]
+django = "*"
 djangorestframework = "*"
 dj-database-url = "*"
-psycopg2 = "*"
-django = "*"
+coverage = "*"
+gunicorn = "*"
+django-heroku = "*"
+psycopg2 = "==2.7.1"
+whitenoise = "*"
+markdown = "*"
+django-filter = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"

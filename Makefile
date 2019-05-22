@@ -1,13 +1,13 @@
 activate:
 	pipenv shell
 
-test: activate
+test:
 	python manage.py test
 
-migrate: activate
+migrate:
 	python manage.py migrate
 
-check_flake8: activate
+check_flake8:
 	pip install flake8
 	flake8
 
@@ -17,8 +17,9 @@ coverage:
 	coverage report --fail-under=70 --show-missing
 	coverage html
 
-travis_test: activate
+travis_test:
 	pipenv install --dev
+	pipenv shell
 	flake8 .
 	coverage erase
 	coverage run manage.py test --verbosity 2
