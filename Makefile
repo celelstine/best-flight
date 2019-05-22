@@ -2,7 +2,7 @@ activate:
 	pipenv shell
 
 test:
-	python manage.py test
+	python manage.py test -v 2 ${APP}
 
 migrate:
 	python manage.py migrate
