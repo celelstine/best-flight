@@ -5,6 +5,6 @@ exclude =
     .git,
     config,
     .vscode
-    venv
+    .venv
     env
 max-complexity = 11
