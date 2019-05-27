@@ -106,3 +106,4 @@ venv.bak/
 # editor
 .vscode/
 
+staticfiles/
