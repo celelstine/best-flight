@@ -7,6 +7,8 @@ verify_ssl = true
 flake8 = "*"
 coverage = "*"
 python-coveralls = "*"
+pytest-django = "*"
+faker = "*"
 
 [packages]
 django = "*"
