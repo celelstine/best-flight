@@ -17,11 +17,10 @@ coverage:
 	coverage report --fail-under=70 --show-missing
 	coverage html
 
-travis_test:
+ci_test:
 	pipenv install --dev
-	# pipenv shell
-	flake8 .
+	pipenv run flake8 .
 	pipenv run coverage erase
-	pipenv run coverage run manage.py test --verbosity 2
+	pipenv run coverage run -m py.test --verbosity 2
 	pipenv run coverage report --fail-under=70 --show-missing
-	pipenv run  coverage html
+	pipenv run coverage html

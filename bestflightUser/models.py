@@ -29,7 +29,7 @@ class BestFlightUserManager(BaseUserManager):
             email,
             password=password,
         )
-        user.staff = True
+        user.is_staff = True
         user.save(using=self._db)
         return user
 
