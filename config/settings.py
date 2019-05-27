@@ -29,7 +29,10 @@ DEBUG =  os.getenv('DEBUG', True)
 AUTH_USER_MODEL = 'bestflightUser.User'
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'https://best-flight-staging.herokuapp.com/',
+    'https://best-flight.herokuapp.com/'
+]
 
 
 # Application definition
