@@ -30,8 +30,8 @@ AUTH_USER_MODEL = 'bestflightUser.User'
 
 
 ALLOWED_HOSTS = [
-    'https://best-flight-staging.herokuapp.com/',
-    'https://best-flight.herokuapp.com/'
+    'best-flight-staging.herokuapp.com/',
+    'best-flight.herokuapp.com/'
 ]
 
 
