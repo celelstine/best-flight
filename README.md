@@ -1,5 +1,5 @@
 # best-flight
-[![CircleCI](https://circleci.com/gh/celelstine/best-flight/tree/develop.svg?style=svg)](https://circleci.com/gh/celelstine/best-flight/tree/develop) [![Coverage Status](https://coveralls.io/repos/github/celelstine/best-flight/badge.svg?branch=develop)](https://coveralls.io/github/celelstine/best-flight?branch=develop)
+[![CircleCI](https://circleci.com/gh/celelstine/best-flight/tree/develop.svg?style=svg)](https://circleci.com/gh/celelstine/best-flight/tree/develop) [![Coverage Status](https://coveralls.io/repos/github/celelstine/best-flight/badge.svg?branch=chore/setup_coverall_ci)](https://coveralls.io/github/celelstine/best-flight?branch=chore/setup_coverall_ci)
 
 Codebase for `Best Flight`, where we get the best flight ticket to move around the world
 
