@@ -17,10 +17,10 @@ dj-database-url = "*"
 coverage = "*"
 gunicorn = "*"
 django-heroku = "*"
-psycopg2 = "==2.7.3"
 whitenoise = "*"
 markdown = "*"
 django-filter = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.6"
