@@ -21,6 +21,7 @@ whitenoise = "*"
 markdown = "*"
 django-filter = "*"
 psycopg2 = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.6"
