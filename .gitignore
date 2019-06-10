@@ -106,4 +106,13 @@ venv.bak/
 # editor
 .vscode/
 
+# media files
 staticfiles/
+media/
+
+# local install
+Pipfile_dev.lock
+Pipfile_dev
+
+# mac os files
+.DS_store
