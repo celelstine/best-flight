@@ -81,8 +81,8 @@ class Profile(BaseAppModelMixin):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='profile')
-    international_passport_number = models.TextField(
-        null=True, blank=True, unique=True)
+    international_passport_number = models.CharField(
+        null=True, blank=True, unique=True, max_length=25)
     dob = models.DateField(null=True, blank=True)
     photo = models.ImageField(
         upload_to=photo_upload_path, validators=[validate_photo_file_size],

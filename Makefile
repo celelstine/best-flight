@@ -1,6 +1,9 @@
 activate:
 	pipenv shell
 
+start:
+	python manage.py runserver
+
 test:
 	python manage.py test -v 2 ${APP}
 

@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', 'nyb($e&5+6ig9rr2jnz)m-xk!3v2h=3xk$!n25ey+$8mx!ps50')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =  os.getenv('DEBUG', True)
+DEBUG = os.getenv('DEBUG', True)
 
 AUTH_USER_MODEL = 'bestflightUser.User'
 
@@ -171,3 +171,7 @@ if os.getenv('HOST_ENV') == 'HEROKU':
     django_heroku.settings(locals())
 
 MAX_PHOTO_UPLOAD_SIZE_MB = int(os.getenv('MAX_PHOTO_UPLOAD_SIZE_MB', 10))
+
+# set the domain
+DOMAIN = os.getenv('DOMAIN', 'http://localhost:8000')
+SUPPORT_MAIL = os.getenv('SUPPORT_MAIL')
