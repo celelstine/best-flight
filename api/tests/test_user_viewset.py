@@ -1,8 +1,11 @@
 import os
 
+from unittest.mock import patch
+
 from django.urls import reverse
 from django.test import Client
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from rest_framework import status
@@ -10,8 +13,11 @@ from rest_framework.test import APITestCase
 
 from faker import Faker
 
+from bestflightUser.models import Profile
+
 
 fake = Faker()
+User = get_user_model()
 
 
 class UserTest(APITestCase):
@@ -21,6 +27,8 @@ class UserTest(APITestCase):
         self.create_url = reverse('api:user-list')
         self.detail_url = reverse('api:user-detail',
                                   kwargs={"pk": '1'})
+        self.login_url = reverse('api:user-login')
+        self.user = User.objects.create(email=fake.email())
 
     def test_create_user(self):
         """test for signup route"""
@@ -91,8 +99,8 @@ class UserTest(APITestCase):
 
     def test_retrieve(self):
         response = self.client.get(self.detail_url)
-        self.assertEqual(response.data, 'coming up soon!!!')
-        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
+        self.assertEqual(response.data, 'Retrieve action not allowed.')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) # noqa
 
     def test_update(self):
         response = self.client.put(self.detail_url)
@@ -108,3 +116,63 @@ class UserTest(APITestCase):
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.data, 'coming up soon!!!')
         self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
+
+    def test_login(self):
+        # email and password are required
+        response = self.client.post(self.login_url, {})
+        self.assertEqual(response.data, 'Please provide both email and password.') # noqa
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # # wrong email
+        payload = {
+            'email': "w{}".format(self.user.email),
+            'password': 'may_right'
+        }
+        response = self.client.post(self.login_url, payload)
+        self.assertEqual(response.data, 'Wrong email or password.')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # # right email and wrong pass
+        payload['email'] = self.user.email
+        response = self.client.post(self.login_url, payload)
+        self.assertEqual(response.data, 'Wrong email or password.')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # right credentials but without a profile
+        with patch.object(User, 'check_password', return_value=True) as _:
+            response = self.client.post(self.login_url, payload)
+            self.assertIn('you don\'t have a profile', response.data)
+            self.assertEqual(response.status_code, status.HTTP_424_FAILED_DEPENDENCY) # noqa
+
+            # let create a profile for this user
+            Profile.objects.create(user=self.user)
+            response = self.client.post(self.login_url, payload)
+            data = response.data
+            user_data = response.data.get('user')
+            self.assertEqual(user_data.get('email'), self.user.email)
+            self.assertIn('token', data)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            # set token to use for authentication
+            token = data.get('token')
+
+        # can not login twice
+        self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+        response = self.client.post(self.login_url, payload)
+        self.assertIn('you have an active session already.', response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_logout(self):
+        with patch.object(User, 'check_password', return_value=True) as _:
+            Profile.objects.create(user=self.user)
+            payload = {
+                'email': self.user.email,
+                'password': 'may_right'
+            }
+            response = self.client.post(self.login_url, payload)
+            token = response.data.get('token')
+
+            url = reverse('api:user-logout')
+            self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+            response = self.client.post(url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)

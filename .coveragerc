@@ -3,6 +3,7 @@ branch=True
 source=bestflightApp,bestflightUser,api
 omit=
     *migrations*
+    *admin.py*
 
 [html]
 directory=htmlcov

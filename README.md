@@ -16,6 +16,14 @@ To install this project you need the following framework and tools
 
 ### Project Structure
 ```bash
+├── api
+│   ├── vi
+│   |   ├── __init__.py
+|   |   ├── serializers.py
+|   |   ├── views.py
+│   ├── tests
+|   ├── __init__.py
+│   ├── urls.py
 ├── bestflightUser
 │   ├── migrations
 │   ├── __init__.py
