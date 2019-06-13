@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 from faker import Faker
 
 from bestflightUser.models import Profile
-
+from bestflightUser.tests.factories import ProfileFactory
 
 fake = Faker()
 User = get_user_model()
@@ -25,10 +25,10 @@ class UserTest(APITestCase):
     def setUp(self):
         self.client = Client()
         self.create_url = reverse('api:user-list')
-        self.detail_url = reverse('api:user-detail',
-                                  kwargs={"pk": '1'})
         self.login_url = reverse('api:user-login')
         self.user = User.objects.create(email=fake.email())
+        self.detail_url = reverse('api:user-detail',
+                                  kwargs={"pk": '1'})
 
     def test_create_user(self):
         """test for signup route"""
@@ -93,29 +93,84 @@ class UserTest(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_list(self):
-        response = self.client.get(self.create_url)
-        self.assertEqual(response.data, 'You can not view a list of users')
-        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        with patch.object(User, 'check_password', return_value=True) as _:
+            Profile.objects.create(user=self.user)
+            payload = {
+                'email': self.user.email,
+                'password': 'may_right'
+            }
+            response = self.client.post(self.login_url, payload)
+            token = response.data.get('token')
+
+            self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+            response = self.client.get(self.create_url)
+            self.assertEqual(response.data, 'You can not view a list of users')
+            self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED) # noqa
 
     def test_retrieve(self):
-        response = self.client.get(self.detail_url)
-        self.assertEqual(response.data, 'Retrieve action not allowed.')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) # noqa
+        with patch.object(User, 'check_password', return_value=True) as _:
+            Profile.objects.create(user=self.user)
+            payload = {
+                'email': self.user.email,
+                'password': 'may_right'
+            }
+            response = self.client.post(self.login_url, payload)
+            token = response.data.get('token')
 
-    def test_update(self):
-        response = self.client.put(self.detail_url)
-        self.assertEqual(response.data, 'coming up soon!!!')
-        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
+            self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+            response = self.client.get(self.detail_url)
+            self.assertEqual(response.data, 'Retrieve action not allowed.')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) # noqa
 
     def test_partial_update(self):
-        response = self.client.patch(self.detail_url)
-        self.assertEqual(response.data, 'coming up soon!!!')
-        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
+        with patch.object(User, 'check_password', return_value=True):
+            profile, created = Profile.objects.get_or_create(user=self.user)
+            payload = {
+                'email': self.user.email,
+                'password': 'may_right'
+            }
+            response = self.client.post(self.login_url, payload)
+            token = response.data.get('token')
+
+        self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+        email = fake.email()
+        payload = {
+            'user': {
+                'email': email,
+            }
+        }
+        url = reverse('api:user-detail', kwargs={"pk": profile.id})
+        """
+        DRF select the parse base off the contentType of the request
+        so we set this to json as the default is octet-stream which expects
+        a file in the request
+        """
+        response = self.client.patch(url, payload,
+                                     content_type='application/json')
+        user = response.data.get('user')
+        self.assertEqual(user.get('email'), email)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # always update the auth profile irrespective of the profile id passed
+        another_profile = ProfileFactory()
+        url = reverse('api:user-detail', kwargs={"pk": another_profile.id})
+        self.assertNotEqual(response.data.get('id'), another_profile.id)
+        self.assertEqual(response.data.get('id'), str(profile.id))
 
     def test_destroy(self):
-        response = self.client.delete(self.detail_url)
-        self.assertEqual(response.data, 'coming up soon!!!')
-        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
+        with patch.object(User, 'check_password', return_value=True) as _:
+            Profile.objects.create(user=self.user)
+            payload = {
+                'email': self.user.email,
+                'password': 'may_right'
+            }
+            response = self.client.post(self.login_url, payload)
+            token = response.data.get('token')
+
+            self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
+            response = self.client.delete(self.detail_url)
+            self.assertEqual(response.data, 'coming up soon!!!')
+            self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE) # noqa
 
     def test_login(self):
         # email and password are required
@@ -163,6 +218,7 @@ class UserTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_logout(self):
+        url = reverse('api:user-logout')
         with patch.object(User, 'check_password', return_value=True) as _:
             Profile.objects.create(user=self.user)
             payload = {
@@ -172,7 +228,10 @@ class UserTest(APITestCase):
             response = self.client.post(self.login_url, payload)
             token = response.data.get('token')
 
-            url = reverse('api:user-logout')
             self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
             response = self.client.post(url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # authenticated users can not logout
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
