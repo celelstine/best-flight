@@ -7,7 +7,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from bestflightUser.models import Profile
-from api.v1.serializers import ProfileSerializer
+from api.v1.serializers import (
+    ProfileSerializer,
+    ProfileSerializerWithoutToken)
 from config.authentication import IsSignUpINOrIsAuthenticated
 
 
@@ -29,6 +31,11 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (IsSignUpINOrIsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.request.method in ['PATCH', 'PUT']:
+            return ProfileSerializerWithoutToken
+        return ProfileSerializer
 
     def create(self, request):
         """create request payload
@@ -83,8 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     def logout(self, request, pk=None):
         """logout a user, simply delete the token attached to the user"""
-        if type(request.user) is User:
-            request.user.auth_token.delete()
+        request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None, **kwargs):
@@ -92,11 +98,19 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response('Retrieve action not allowed.',
                         status=status.HTTP_403_FORBIDDEN)
 
-    def update(self, request, pk=None):
-        return coming_up_soon()
+    def update(self, request, pk=None, *args, **kwargs):
+        # get the profile id from request.user
+        profile = self.get_queryset().get(user=request.user)
+        request.parser_context['kwargs']['pk'] = profile.id
+        return super(UserViewSet, self).update(
+            request, pk=profile.id, *args, **kwargs)
 
-    def partial_update(self, request, pk=None):
-        return coming_up_soon()
+    def partial_update(self, request, pk=None, *args, **kwargs):
+        # get the profile id from request.user
+        profile = self.get_queryset().get(user=request.user)
+        request.parser_context['kwargs']['pk'] = profile.id
+        return super(UserViewSet, self).partial_update(
+            request, pk=profile.id, *args, **kwargs)
 
     def destroy(self, request, pk=None):
         return coming_up_soon()
