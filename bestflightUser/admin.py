@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User, Profile
+from bestflightUser.models import User, Profile
 
 
 def get_photo(obj):
