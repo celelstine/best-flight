@@ -13,7 +13,7 @@ from bestflightApp.models import (
 
 class CreateNextAvailableFlights(CronJobBase):
     """a cron job to create next available flight"""
-    RUN_EVERY_MINS = 60 * 24
+    RUN_EVERY_MINS = 60 * 60 * 24
     RETRY_AFTER_FAILURE_MINS = 20
     MIN_NUM_FAILURES = 3  # number of failure run before notification
 

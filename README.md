@@ -76,6 +76,14 @@ make test APP=app_name
 ```
 note: remove the  `APP` argument to run every test
 
+
+### How to run Cron jobs
+This project uses a third party application https://django-cron.readthedocs.io/en/latest/
+
+To run the cron jobs; enter ```python manage.py runcrons```
+
+To run the cron jobs after an update ; enter ```python manage.py runcrons --force```
+
 ### Coding Style
 WE adhere to pep8 standard
 
