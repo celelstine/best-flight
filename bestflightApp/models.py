@@ -64,7 +64,7 @@ class AirlineFlightPath(BaseAppModelMixin, models.Model):
     airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
     airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
     pick_up = models.CharField(max_length=225)
-    destinaton = models.CharField(max_length=225)
+    destination = models.CharField(max_length=225)
     should_reoccur = models.BooleanField(default=False)
     # should be in minutes
     reoccurrence_step = models.IntegerField(null=True, blank=True)
@@ -77,7 +77,7 @@ class AirlineFlightPath(BaseAppModelMixin, models.Model):
     def __str__(self):
         return '{}: {} >> {}'.format(
             self.airline.title,
-            self.pick_up, self.destinaton)
+            self.pick_up, self.destination)
 
 
 class AvailableFlight(BaseAppModelMixin, models.Model):
@@ -94,6 +94,11 @@ class AvailableFlight(BaseAppModelMixin, models.Model):
 
     class Meta:
         verbose_name_plural = "Available Flights"
+
+    def save(self, *args, **kwargs):
+        if self.boarding_time > self.take_off_time:
+            raise ValueError('take boarding time should not be ahead of takeoff time')  # noqa
+        super(AvailableFlight, self).save(*args, **kwargs)
 
     def __str__(self):
         return '{} | boarding: {}'.format(str(self.airlinePath),
