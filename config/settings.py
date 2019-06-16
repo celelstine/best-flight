@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'bestflightUser.apps.BestflightuserConfig',
     'bestflightApp.apps.BestflightappConfig',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -107,6 +108,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+ADMINS = [
+    ('Celestine', 'okorocelestine@gmail.com'),
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -175,3 +179,24 @@ MAX_PHOTO_UPLOAD_SIZE_MB = int(os.getenv('MAX_PHOTO_UPLOAD_SIZE_MB', 10))
 # set the domain
 DOMAIN = os.getenv('DOMAIN', 'http://localhost:8000')
 SUPPORT_MAIL = os.getenv('SUPPORT_MAIL')
+
+# confid crontab
+CRON_CLASSES = [
+     # for email notification on failed jobs
+     # ref: https://django-cron.readthedocs.io/en/latest/sample_cron_configurations.html  # noqa
+    'django_cron.cron.FailedRunsNotificationCronJob',
+    'bestflightApp.cron.CreateNextAvailableFlights',
+]
+
+
+FAILED_RUNS_CRONJOB_EMAIL_PREFIX = '[Failed Jobs]: '
+
+
+# email setttings
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+print('SENDGRID_API_KEY', SENDGRID_API_KEY)
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

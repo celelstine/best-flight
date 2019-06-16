@@ -23,6 +23,8 @@ django-filter = "*"
 psycopg2 = "*"
 pillow = "*"
 factory-boy = "*"
+django-cron = "*"
+django-common = "*"
 
 [requires]
 python_version = "3.6"
