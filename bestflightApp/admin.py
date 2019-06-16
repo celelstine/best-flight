@@ -60,11 +60,11 @@ class AirplaneCapacityAdmin(admin.ModelAdmin):
 @admin.register(AirlineFlightPath)
 class AirlineFlightPathAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'airplane', 'airline', 'pick_up', 'destinaton',
+        'id', 'airplane', 'airline', 'pick_up', 'destination',
         'should_reoccur', 'reoccurrence_step', 'date_last_flight',
         'create_date', 'modify_date',)
     readonly_fields = ('create_date', 'modify_date', 'date_last_flight')
-    search_fields = ['pick_up', 'destinaton', 'id']
+    search_fields = ['pick_up', 'destination', 'id']
     empty_value_display = 'None'
 
 

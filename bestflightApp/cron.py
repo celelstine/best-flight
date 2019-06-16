@@ -1,5 +1,5 @@
 """we shall create cron job here"""
-import datetime
+from datetime import datetime, timedelta
 
 from django.utils import timezone
 
@@ -13,7 +13,7 @@ from bestflightApp.models import (
 
 class CreateNextAvailableFlights(CronJobBase):
     """a cron job to create next available flight"""
-    RUN_EVERY_MINS = 60 * 60 * 24
+    RUN_EVERY_MINS = 60 * 24
     RETRY_AFTER_FAILURE_MINS = 20
     MIN_NUM_FAILURES = 3  # number of failure run before notification
 
@@ -23,7 +23,7 @@ class CreateNextAvailableFlights(CronJobBase):
 
     def do(self):
         # fetch AirlineFlightPaths that should reoccur
-        now = datetime.datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=timezone.utc)
         print('Creating available flights for the next 5 days')
         flight_paths = AirlineFlightPath.objects.filter(
             should_reoccur=True, reoccurrence_step__isnull=False,
@@ -51,18 +51,19 @@ class CreateNextAvailableFlights(CronJobBase):
                     airlinePath=flight_path.get('id'),
                 ).values('boarding_time', 'take_off_time', 'cost').last()
 
-                next_boarding_time = last_flight.get('boarding_time')
-                next_take_off_time = last_flight.get('take_off_time')
+                if last_flight:
+                    next_boarding_time = last_flight.get('boarding_time')
+                    next_take_off_time = last_flight.get('take_off_time')
 
-                for i in range(no_flight_left):
-                    next_boarding_time += datetime.timedelta(minutes=reoccurrence_step) # noqa
-                    next_take_off_time += datetime.timedelta(minutes=reoccurrence_step) # noqa
-                    AvailableFlight.objects.create(
-                        airlinePath_id=flight_path.get('id'),
-                        boarding_time=next_boarding_time,
-                        take_off_time=next_take_off_time,
-                        cost=last_flight.get('cost')
-                    )
-                print(
-                    'Created available flights for the next 5 days for {}'.format( # noqa
-                        flight_path))
+                    for i in range(no_flight_left):
+                        next_boarding_time += timedelta(minutes=reoccurrence_step) # noqa
+                        next_take_off_time += timedelta(minutes=reoccurrence_step) # noqa
+                        AvailableFlight.objects.create(
+                            airlinePath_id=flight_path.get('id'),
+                            boarding_time=next_boarding_time,
+                            take_off_time=next_take_off_time,
+                            cost=last_flight.get('cost')
+                        )
+                    print(
+                        'Created available flights for the next 5 days for {}'.format( # noqa
+                            flight_path))

@@ -1,5 +1,9 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import status
 from rest_framework import viewsets
@@ -7,8 +11,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from bestflightUser.models import Profile
+from bestflightApp.models import AvailableFlight
 from api.v1.serializers import (
     ProfileSerializer,
+    AvailableFlightSerializer,
     ProfileSerializerWithoutToken)
 from config.authentication import IsSignUpINOrIsAuthenticated
 
@@ -114,3 +120,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None):
         return coming_up_soon()
+
+
+class AvailableFlightsViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = AvailableFlightSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('boarding_time', 'cost', 'airlinePath')
+
+    def get_queryset(self):
+        """add filter for flight path"""
+        pick_up = self.request.query_params.get('from', None)
+        destination = self.request.query_params.get('to', None)
+        airline = self.request.query_params.get('airline', None)
+        minutes_after = datetime.now(tz=timezone.utc) + timedelta(minutes=10)
+        queryset = AvailableFlight.objects.filter(
+           boarding_time__gt=minutes_after
+        )
+
+        if pick_up:
+            queryset = queryset.filter(airlinePath__pick_up__icontains=pick_up)
+        if destination:
+            queryset = queryset.filter(
+                airlinePath__destination__icontains=destination)
+        if airline:
+            queryset = queryset.filter(
+                airlinePath__airline__title__icontains=airline)
+        return queryset.order_by('id')

@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 from bestflightUser.models import Profile
+from bestflightApp.models import AvailableFlight
 
 User = get_user_model()
 
@@ -72,3 +73,20 @@ class ProfileSerializerWithoutToken(serializers.ModelSerializer):
         instance.international_passport = validated_data.get('international_passport', instance.international_passport) # noqa
         instance.save()
         return instance
+
+
+class AvailableFlightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AvailableFlight
+        fields = (
+            'id', 'path', 'boarding_time', 'take_off_time',
+            'cost')
+
+    path = serializers.SerializerMethodField()
+    cost = serializers.SerializerMethodField()
+
+    def get_path(self, obj):
+        return str(obj.airlinePath)
+
+    def get_cost(self, obj):
+        return '₦{:,.2f}'.format(obj.cost)
