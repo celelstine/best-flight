@@ -1,13 +1,20 @@
 """we shall create cron job here"""
 from datetime import datetime, timedelta
 
+from django.urls import reverse
+from django.conf import settings
 from django.utils import timezone
+from django.template import loader
+
+from django.core.mail import send_mail
+
 
 from django_cron import CronJobBase, Schedule
 
 from bestflightApp.models import (
+    Reservation,
     AvailableFlight,
-    AirlineFlightPath
+    AirlineFlightPath,
 )
 
 
@@ -67,3 +74,52 @@ class CreateNextAvailableFlights(CronJobBase):
                     print(
                         'Created available flights for the next 5 days for {}'.format( # noqa
                             flight_path))
+
+
+class FlightReminder(CronJobBase):
+    """a cron job to reminder a users about their flight, a day before departure""" # noqa
+    RUN_EVERY_MINS = 60 * 24  # run every day
+    RETRY_AFTER_FAILURE_MINS = 20
+    MIN_NUM_FAILURES = 3  # number of failure run before notification
+
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS,
+                        retry_after_failure_mins=RETRY_AFTER_FAILURE_MINS)
+    code = 'bestflightApp.flight_reminder'  # a unique identifier
+
+    def do(self):
+        # fetch reservations would department tomorrow
+        today = datetime.now(tz=timezone.utc)
+        next_tomorrow = today + timedelta(days=2)
+        reservations = Reservation.objects.filter(
+            flight__boarding_time__gte=today,
+            flight__boarding_time__lte=next_tomorrow,
+            sent_reminder=False
+        )
+        for reservation in reservations:
+            path = reservation.flight.airlinePath
+            user_name = reservation.user.first_name if reservation.user.first_name else '' # noqa
+            print('sending flight reminder to {}'.format(user_name))
+            html = loader.render_to_string(
+                'email/flight_reminder.html',
+                {
+                    'name': user_name,
+                    'path': path,
+                    'boarding_time': reservation.flight.boarding_time,
+                    'url': "{}{}".format(
+                        settings.DOMAIN,
+                        reverse('api:reservation-detail',
+                                kwargs={"pk": reservation.id}))
+                }
+            )
+            result = send_mail(
+                'Flight Reminder for your flight: {}'.format(path),
+                'Prepare for your flight for tomorrow',
+                settings.CONTACT_MAIL,
+                [reservation.user.email],
+                fail_silently=False,
+                html_message=html
+            )
+            if result == 1:
+                print('sent flight reminder to {}'.format(user_name))
+                reservation.sent_reminder = True
+                reservation.save()

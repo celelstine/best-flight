@@ -5,7 +5,10 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 from bestflightUser.models import Profile
-from bestflightApp.models import AvailableFlight
+from bestflightApp.models import (
+    AvailableFlight,
+    Reservation
+)
 
 User = get_user_model()
 
@@ -90,3 +93,9 @@ class AvailableFlightSerializer(serializers.ModelSerializer):
 
     def get_cost(self, obj):
         return '₦{:,.2f}'.format(obj.cost)
+
+
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = ('id', 'flight', 'flight_class', 'user', 'feedback',)
