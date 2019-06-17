@@ -113,3 +113,4 @@ class Reservation(BaseAppModelMixin, models.Model):
     flight_class = models.ForeignKey(FlightClass, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     feedback = models.TextField(blank=True, null=True, max_length=500)
+    sent_reminder = models.BooleanField(default=False)

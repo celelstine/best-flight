@@ -9,11 +9,16 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 
 from bestflightUser.models import Profile
-from bestflightApp.models import AvailableFlight
+from bestflightApp.models import (
+    Reservation,
+    AvailableFlight,
+)
 from api.v1.serializers import (
     ProfileSerializer,
+    ReservationSerializer,
     AvailableFlightSerializer,
     ProfileSerializerWithoutToken)
 from config.authentication import IsSignUpINOrIsAuthenticated
@@ -30,6 +35,11 @@ def coming_up_soon():
 def failed_login():
     return Response('Wrong email or password.',
                     status=status.HTTP_401_UNAUTHORIZED)
+
+
+def forbidden():
+    return Response('Retrieve action not allowed.',
+                    status=status.HTTP_403_FORBIDDEN)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -101,8 +111,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None, **kwargs):
         """we would not support retrieve, an admin should use django admin"""
-        return Response('Retrieve action not allowed.',
-                        status=status.HTTP_403_FORBIDDEN)
+        return forbidden()
 
     def update(self, request, pk=None, *args, **kwargs):
         # get the profile id from request.user
@@ -146,3 +155,23 @@ class AvailableFlightsViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(
                 airlinePath__airline__title__icontains=airline)
         return queryset.order_by('id')
+
+
+class ReservationViewSet(viewsets.ModelViewSet):
+    serializer_class = ReservationSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        """show only the user's reservations"""
+        return Reservation.objects.filter(
+           user=self.request.user
+        )
+
+    def partial_update(self, request, pk=None, *args, **kwargs):
+        return forbidden()
+
+    def update(self, request, pk=None, *args, **kwargs):
+        return forbidden()
+
+    def destroy(self, request, pk=None,):
+        return forbidden()

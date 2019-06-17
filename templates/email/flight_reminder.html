@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			.company_name {
+				width: 54%;
+    		display: inline-flex;
+				padding: 1em 0 1em 0;
+				margin-bottom: 0px;
+
+			}
+			.title {
+				width: 32%;
+				display: inline-flex;
+				color: #21218c;
+				padding: 1em;
+				margin-bottom: 0px;
+
+			}
+			p {
+				padding: 0
+			}
+		</style>
+	</head>
+	<body>
+			<div style="padding: 1em; padding: 2em;">
+				<div style="border-bottom: 0.2em solid #403737;">
+					<h1 class="company_name"> Bestflight</h1>
+					<h2 class="title"> &#x23F0; Flight Reminder</h2>
+				</div>
+
+				<p style="text-transform: capitalize;"> Hi {{ name }}, </p>
+				<p>We want to reminder of your flight {{ path }} by tommorrow {{ boarding_time }}.</p>
+				<p>Kindly ensure to pack your luggage and arrive at the airport at least an hour to boarding.</p>
+				<p>You can view your flight details <a href="{{url}}"><here</a> </p>
+				<p>We wish your a safe and pleasant flight.</p>
+			</div>
+	</body>
+</html>
