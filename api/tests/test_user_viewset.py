@@ -1,6 +1,4 @@
 import os
-from django.utils import timezone
-from datetime import datetime
 
 from unittest.mock import patch
 
@@ -15,16 +13,10 @@ from rest_framework.test import APITestCase
 
 from faker import Faker
 
-from bestflightUser.models import Profile
-
-from bestflightApp.models import (
-    Airline,
-    Airplane,
-    FlightClass,
-    AvailableFlight,
-    AirlineFlightPath,
+from bestflightUser.tests.factories import (
+    UserFactory,
+    ProfileFactory
 )
-from bestflightUser.tests.factories import ProfileFactory
 
 fake = Faker()
 User = get_user_model()
@@ -36,7 +28,7 @@ class UserTest(APITestCase):
         self.client = Client()
         self.create_url = reverse('api:user-list')
         self.login_url = reverse('api:user-login')
-        self.user = User.objects.create(email=fake.email())
+        self.user = UserFactory()
         self.detail_url = reverse('api:user-detail',
                                   kwargs={"pk": '1'})
 
@@ -104,7 +96,7 @@ class UserTest(APITestCase):
 
     def test_list(self):
         with patch.object(User, 'check_password', return_value=True) as _:
-            Profile.objects.create(user=self.user)
+            ProfileFactory(user=self.user)
             payload = {
                 'email': self.user.email,
                 'password': 'may_right'
@@ -119,7 +111,7 @@ class UserTest(APITestCase):
 
     def test_retrieve(self):
         with patch.object(User, 'check_password', return_value=True) as _:
-            Profile.objects.create(user=self.user)
+            ProfileFactory(user=self.user)
             payload = {
                 'email': self.user.email,
                 'password': 'may_right'
@@ -134,7 +126,7 @@ class UserTest(APITestCase):
 
     def test_partial_update(self):
         with patch.object(User, 'check_password', return_value=True):
-            profile, created = Profile.objects.get_or_create(user=self.user)
+            profile = ProfileFactory(user=self.user)
             payload = {
                 'email': self.user.email,
                 'password': 'may_right'
@@ -169,7 +161,7 @@ class UserTest(APITestCase):
 
     def test_destroy(self):
         with patch.object(User, 'check_password', return_value=True) as _:
-            Profile.objects.create(user=self.user)
+            ProfileFactory(user=self.user)
             payload = {
                 'email': self.user.email,
                 'password': 'may_right'
@@ -210,7 +202,7 @@ class UserTest(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_424_FAILED_DEPENDENCY) # noqa
 
             # let create a profile for this user
-            Profile.objects.create(user=self.user)
+            ProfileFactory(user=self.user)
             response = self.client.post(self.login_url, payload)
             data = response.data
             user_data = response.data.get('user')
@@ -230,7 +222,7 @@ class UserTest(APITestCase):
     def test_logout(self):
         url = reverse('api:user-logout')
         with patch.object(User, 'check_password', return_value=True) as _:
-            Profile.objects.create(user=self.user)
+            ProfileFactory(user=self.user)
             payload = {
                 'email': self.user.email,
                 'password': 'may_right'
@@ -245,45 +237,3 @@ class UserTest(APITestCase):
         # authenticated users can not logout
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class ReservationTest(APITestCase):
-    def setUp(self):
-        self.airline = Airline.objects.create(title='test_airline')
-        self.airplane = Airplane.objects.create(
-            title='test_airplane',
-            total_capacity=5
-        )
-        self.flight_class = FlightClass.objects.create(title='test_class')
-        self.flight_path = AirlineFlightPath.objects.create(
-            airplane=self.airplane, airline=self.airline,
-            pick_up='Abuja', destination='Lagos'
-        )
-        self.flight = AvailableFlight.objects.create(
-            airlinePath=self.flight_path,
-            boarding_time=datetime.now(tz=timezone.utc),
-            take_off_time=datetime.now(tz=timezone.utc),
-            cost=10.1
-        )
-        self.user = User.objects.create(email=fake.email())
-        self.url = reverse('api:reservation-list')
-        self.login_url = reverse('api:user-login')
-
-    def test_create_reservation(self):
-        reservation_payload = {
-            "flight": self.flight.id,
-            "flight_class": self.flight_class.id,
-            "user": self.user.id,
-        }
-        with patch.object(User, 'check_password', return_value=True) as _:
-            Profile.objects.create(user=self.user)
-            payload = {
-                'email': self.user.email,
-                'password': 'may_right'
-            }
-            response = self.client.post(self.login_url, payload)
-            token = response.data.get('token')
-
-            self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
-            response = self.client.post(self.url, reservation_payload)
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
