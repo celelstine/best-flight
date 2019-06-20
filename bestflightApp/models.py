@@ -97,7 +97,7 @@ class AvailableFlight(BaseAppModelMixin, models.Model):
 
     def save(self, *args, **kwargs):
         if self.boarding_time > self.take_off_time:
-            raise ValueError('take boarding time should not be ahead of takeoff time')  # noqa
+            raise ValueError('Take off boarding time should not be ahead of takeoff time')  # noqa
         super(AvailableFlight, self).save(*args, **kwargs)
 
     def __str__(self):

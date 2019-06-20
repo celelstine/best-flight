@@ -18,3 +18,12 @@ class IsSignUpINOrIsAuthenticated(permissions.BasePermission):
             if not (view.action == 'create' or view.action == 'login'):
                 return False
         return True
+
+
+class IsAdminOnly(permissions.BasePermission):
+    """route for only admin users"""
+
+    def has_permission(self, request, view):
+        if type(request.user) is User and request.user.is_superuser:
+            return True
+        return False

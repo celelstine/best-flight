@@ -14,6 +14,7 @@ from faker import Faker
 
 from bestflightApp.tests.factories import (
     FlightClassFactory,
+    ReservationFactory,
     AvailableFlightFactory,
 )
 
@@ -56,7 +57,7 @@ class AvailableFlightTest(APITestCase):
         self.assertEqual(len(response.data), 1)
 
         arline = self.flight2.airlinePath.airline.title
-        url = "{}?airline={}&from={}".format(self.url, arline, pick_up) # noqa
+        url = "{}?airline={}&from={}".format(self.url, arline, pick_up)
         response = self.client.get(url)
         self.assertEqual(len(response.data), 1)
 
@@ -69,12 +70,13 @@ class ReservationTest(APITestCase):
         self.url = reverse('api:reservation-list')
         self.login_url = reverse('api:user-login')
 
-    def test_create_reservation(self):
-        reservation_payload = {
-            "flight": self.flight.id,
-            "flight_class": self.flight_class.id,
-            "user": self.profile.user.id,
-        }
+        # create some reservations
+        reservation = ReservationFactory(user=self.profile.user)
+        ReservationFactory()
+
+        self.detail_url = reverse('api:reservation-detail',
+                                  kwargs={"pk": reservation.id})
+
         with patch.object(User, 'check_password', return_value=True) as _:
             payload = {
                 'email': self.profile.user.email,
@@ -84,5 +86,50 @@ class ReservationTest(APITestCase):
             token = response.data.get('token')
 
             self.client.defaults['HTTP_AUTHORIZATION'] = 'Bearer ' + token
-            response = self.client.post(self.url, reservation_payload)
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_reservation(self):
+        reservation_payload = {
+            "flight": self.flight.id,
+            "flight_class": self.flight_class.id,
+            "user": self.profile.user.id,
+        }
+        response = self.client.post(self.url, reservation_payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_list_reservation(self):
+        response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 1)
+
+    def test_retrieve_reservation(self):
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_reservation(self):
+        response = self.client.put(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.patch(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_reservation(self):
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ViewFlightClassess(APITestCase):
+    def setUp(self):
+        # create some test flight class
+        self.flight_class = FlightClassFactory()
+        FlightClassFactory()
+        FlightClassFactory()
+
+        self.url = reverse('api:flight_class-list')
+
+    def test_list_flight_classes(self):
+        response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 3)
+
+        response = self.client.get(self.url, {
+                'title': self.flight_class.title,
+            })
+        self.assertEqual(len(response.data), 1)

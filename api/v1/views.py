@@ -13,11 +13,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from bestflightUser.models import Profile
 from bestflightApp.models import (
+    FlightClass,
     Reservation,
     AvailableFlight,
 )
 from api.v1.serializers import (
     ProfileSerializer,
+    FlightClassSerializer,
     ReservationSerializer,
     AvailableFlightSerializer,
     ProfileSerializerWithoutToken)
@@ -175,3 +177,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None,):
         return forbidden()
+
+
+class FlightClassViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = FlightClass.objects.all()
+    serializer_class = FlightClassSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('title',)

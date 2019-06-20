@@ -29,8 +29,7 @@ class UserTest(APITestCase):
         self.create_url = reverse('api:user-list')
         self.login_url = reverse('api:user-login')
         self.user = UserFactory()
-        self.detail_url = reverse('api:user-detail',
-                                  kwargs={"pk": '1'})
+        self.detail_url = reverse('api:user-detail', kwargs={"pk": '1'})
 
     def test_create_user(self):
         """test for signup route"""

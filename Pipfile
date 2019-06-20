@@ -14,7 +14,6 @@ faker = "*"
 django = "*"
 djangorestframework = "*"
 dj-database-url = "*"
-coverage = "*"
 gunicorn = "*"
 django-heroku = "*"
 whitenoise = "*"
@@ -25,6 +24,7 @@ pillow = "*"
 factory-boy = "*"
 django-cron = "*"
 django-common = "*"
+
 
 [requires]
 python_version = "3.6"

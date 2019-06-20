@@ -4,6 +4,7 @@ source=bestflightApp,bestflightUser,api
 omit=
     *migrations*
     *admin.py*
+    *factories.py*
 
 [html]
 directory=htmlcov

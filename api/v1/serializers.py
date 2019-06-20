@@ -6,8 +6,9 @@ from rest_framework.authtoken.models import Token
 
 from bestflightUser.models import Profile
 from bestflightApp.models import (
+    FlightClass,
+    Reservation,
     AvailableFlight,
-    Reservation
 )
 
 User = get_user_model()
@@ -99,3 +100,9 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ('id', 'flight', 'flight_class', 'user', 'feedback',)
+
+
+class FlightClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlightClass
+        fields = ('id', 'title',)
