@@ -9,7 +9,6 @@ coverage = "*"
 python-coveralls = "*"
 pytest-django = "*"
 faker = "*"
-locustio = "*"
 
 [packages]
 django = "*"
