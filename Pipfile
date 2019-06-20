@@ -9,12 +9,12 @@ coverage = "*"
 python-coveralls = "*"
 pytest-django = "*"
 faker = "*"
+locustio = "*"
 
 [packages]
 django = "*"
 djangorestframework = "*"
 dj-database-url = "*"
-coverage = "*"
 gunicorn = "*"
 django-heroku = "*"
 whitenoise = "*"
@@ -25,7 +25,7 @@ pillow = "*"
 factory-boy = "*"
 django-cron = "*"
 django-common = "*"
-locustio = "*"
+
 
 [requires]
 python_version = "3.6"
