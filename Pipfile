@@ -25,6 +25,7 @@ pillow = "*"
 factory-boy = "*"
 django-cron = "*"
 django-common = "*"
+locustio = "*"
 
 [requires]
 python_version = "3.6"
