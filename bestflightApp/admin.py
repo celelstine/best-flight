@@ -28,8 +28,9 @@ class FlightClassAdmin(admin.ModelAdmin):
 
 @admin.register(Airplane)
 class AirplaneAdmin(admin.ModelAdmin):
-    fields = ('id', 'title', 'create_date', 'modify_date')
-    list_display = ('id', 'title', 'capacity', 'create_date', 'modify_date')
+    fields = ('id', 'title', 'total_capacity', 'create_date', 'modify_date')
+    list_display = ('id', 'title', 'total_capacity', 'capacity', 
+                    'create_date', 'modify_date')
     readonly_fields = ('id', 'create_date', 'modify_date',)
     search_fields = ('title', 'id',)
 
