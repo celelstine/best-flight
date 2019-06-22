@@ -1,0 +1,14 @@
+[run]
+branch=True
+source=bestflightApp,bestflightUser,api
+omit=
+    *migrations*
+    *admin.py*
+    *factories.py*
+
+[html]
+directory=htmlcov
+
+[report]
+show_missing=True
+exclude_lines=pragma: no cover

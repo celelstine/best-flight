@@ -1,0 +1,30 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+coverage = "*"
+python-coveralls = "*"
+pytest-django = "*"
+faker = "*"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+dj-database-url = "*"
+gunicorn = "*"
+django-heroku = "*"
+whitenoise = "*"
+markdown = "*"
+django-filter = "*"
+psycopg2 = "*"
+pillow = "*"
+factory-boy = "*"
+django-cron = "*"
+django-common = "*"
+
+
+[requires]
+python_version = "3.6"
