@@ -116,3 +116,7 @@ Pipfile_dev
 
 # mac os files
 .DS_store
+
+
+# config files
+newrelic.ini

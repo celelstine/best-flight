@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'bestflightUser.apps.BestflightuserConfig',
     'bestflightApp.apps.BestflightappConfig',
-    'django_cron',
     'django_filters',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -187,18 +187,13 @@ DOMAIN = os.getenv('DOMAIN', 'http://localhost:8000')
 SUPPORT_MAIL = os.getenv('SUPPORT_MAIL')
 CONTACT_MAIL = os.getenv('CONTACT_MAIL')
 DEFAULT_FROM_EMAIL = os.getenv('CONTACT_MAIL')
-# confid crontab
-CRON_CLASSES = [
-     # for email notification on failed jobs
-     # ref: https://django-cron.readthedocs.io/en/latest/sample_cron_configurations.html  # noqa
-    'django_cron.cron.FailedRunsNotificationCronJob',
-    'bestflightApp.cron.CreateNextAvailableFlights',
-    'bestflightApp.cron.FlightReminder',
+
+# config cronjob for local , we shall use heroku scheduler for prod
+CRONJOBS = [
+    # ref: https://pypi.org/project/django-crontab/
+    ('0 19 * * *', 'bestflightApp.cron.CreateNextAvailableFlights'),
+    ('0 * * * *', 'bestflightApp.cron.FlightReminder'),
 ]
-
-
-FAILED_RUNS_CRONJOB_EMAIL_PREFIX = '[Failed Jobs]: '
-
 
 # email setttings
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
