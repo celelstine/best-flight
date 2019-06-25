@@ -78,11 +78,15 @@ note: remove the  `APP` argument to run every test
 
 
 ### How to run Cron jobs
-This project uses a third party application https://django-cron.readthedocs.io/en/latest/
+- run cron locally:
 
-To run the cron jobs; enter ```python manage.py runcrons```
+    we use https://pypi.org/project/django-crontab/ locally
 
-To run the cron jobs after an update ; enter ```python manage.py runcrons --force```
+    To register the cron jobs; enter ```python manage.py crontab add```
+- run cron on Heroku
+    we use https://pypi.org/project/APScheduler/, instructions can be found here https://devcenter.heroku.com/articles/clock-processes-python
+
+
 
 ### Coding Style
 WE adhere to pep8 standard
