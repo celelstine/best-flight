@@ -22,9 +22,9 @@ django-filter = "*"
 psycopg2 = "*"
 pillow = "*"
 factory-boy = "*"
-django-cron = "*"
 django-common = "*"
-
+django-crontab = "*"
+apscheduler = "*"
 
 [requires]
 python_version = "3.6"
