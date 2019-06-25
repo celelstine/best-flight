@@ -46,8 +46,6 @@ def create_next_available_flights():
                 airlinePath=flight_path.get('id'),
             ).values('boarding_time', 'take_off_time', 'cost').last()
 
-            print('last_flight', last_flight)
-
             if last_flight:
                 next_boarding_time = last_flight.get('boarding_time')
                 next_take_off_time = last_flight.get('take_off_time')
@@ -57,17 +55,15 @@ def create_next_available_flights():
                     next_boarding_time = now + timedelta(minutes=30)
                     next_take_off_time = next_boarding_time + diff_boarding_take_off  # noqa
 
-                print('-->', no_flight_left)
                 for i in range(no_flight_left):
                     next_boarding_time += timedelta(minutes=reoccurrence_step) # noqa
                     next_take_off_time += timedelta(minutes=reoccurrence_step) # noqa
-                    t = AvailableFlight.objects.create(
+                    AvailableFlight.objects.create(
                         airlinePath_id=flight_path.get('id'),
                         boarding_time=next_boarding_time,
                         take_off_time=next_take_off_time,
                         cost=last_flight.get('cost')
                     )
-                    print('see', t.id)
                 print(
                     'Created available flights for the next 5 days for {}'.format( # noqa
                         flight_path))

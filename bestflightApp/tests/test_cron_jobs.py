@@ -18,8 +18,8 @@ from bestflightApp.tests.factories import (
     ReservationFactory,
 )
 from bestflightApp.cron import (
-    FlightReminder,
-    CreateNextAvailableFlights,
+    flight_reminder,
+    create_next_available_flights
 )
 
 
@@ -27,7 +27,7 @@ User = get_user_model()
 fake = Faker()
 
 
-class CreateNextAvailableFlightsTestCase(TestCase):
+class CronTestCase(TestCase):
     def setUp(self):
         self.flight_path = AirlineFlightPathFactory(
             should_reoccur=True, reoccurrence_step=200
@@ -39,10 +39,10 @@ class CreateNextAvailableFlightsTestCase(TestCase):
             airlinePath=self.flight_path,
             boarding_time=self.boarding_time,
             take_off_time=take_off_time)
-        self.cron = CreateNextAvailableFlights()
+        self.reservation = ReservationFactory()
 
-    def test_job(self):
-        self.cron.do()
+    def test_create_next_available_flights(self):
+        create_next_available_flights()
 
         # should create flight for next 5 days
         no_flight = ((5 * 24 * 60) / 200) - 2
@@ -51,14 +51,8 @@ class CreateNextAvailableFlightsTestCase(TestCase):
         ).count()
         self.assertEqual(no_flight, no_created)
 
-
-class FlightReminderTestCase(TestCase):
-    def setUp(self):
-        self.reservation = ReservationFactory()
-        self.cron = FlightReminder()
-
-    def test_job(self):
+    def test_flight_reminder(self):
         with patch('django.core.mail.send_mail', return_value=1) as _:
-            self.cron.do()
+            flight_reminder()
             reservation = Reservation.objects.get(pk=self.reservation.id)
             self.assertEqual(reservation.sent_reminder, True)
