@@ -6,7 +6,10 @@ from django.conf import settings
 from django.utils import timezone
 from django.template import loader
 
-from django.core.mail import send_mail
+from django.core.mail import (
+    get_connection,
+    EmailMessage
+)
 
 from bestflightApp.models import (
     Reservation,
@@ -72,38 +75,48 @@ def create_next_available_flights():
 def flight_reminder():
     """a cron job to reminder a users about their flight, a day before departure""" # noqa
     # fetch reservations would department tomorrow
-    today = datetime.now(tz=timezone.utc)
-    next_tomorrow = today + timedelta(days=2)
+    tomorrow = datetime.now(tz=timezone.utc) + timedelta(days=1)
     reservations = Reservation.objects.filter(
-        flight__boarding_time__gte=today,
-        flight__boarding_time__lte=next_tomorrow,
+        flight__boarding_time__date__gte=tomorrow,
         sent_reminder=False
     )
-    for reservation in reservations:
-        path = reservation.flight.airlinePath
-        user_name = reservation.user.first_name if reservation.user.first_name else '' # noqa
-        print('sending flight reminder to {}'.format(user_name))
-        html = loader.render_to_string(
-            'email/flight_reminder.html',
-            {
-                'name': user_name,
-                'path': path,
-                'boarding_time': reservation.flight.boarding_time,
-                'url': "{}{}".format(
-                    settings.DOMAIN,
-                    reverse('api:reservation-detail',
-                            kwargs={"pk": reservation.id}))
-            }
-        )
-        result = send_mail(
-            'Flight Reminder for your flight: {}'.format(path),
-            'Prepare for your flight for tomorrow',
-            settings.CONTACT_MAIL,
-            [reservation.user.email],
-            fail_silently=False,
-            html_message=html
-        )
-        if result == 1:
-            print('sent flight reminder to {}'.format(user_name))
-            reservation.sent_reminder = True
-            reservation.save()
+
+    if reservations.count() > 0:
+        smtp_connection = get_connection()
+
+        # Establishing and closing an SMTP connection (or any other network
+        # connection, for that matter) is an expensive process. so we shall
+        # use one connection
+        smtp_connection.open()
+
+        for reservation in reservations:
+            path = reservation.flight.airlinePath
+            user_name = reservation.user.first_name if reservation.user.first_name else '' # noqa
+            print('sending flight reminder to {}'.format(user_name))
+            html = loader.render_to_string(
+                'email/flight_reminder.html',
+                {
+                    'name': user_name,
+                    'path': path,
+                    'boarding_time': reservation.flight.boarding_time,
+                    'url': "{}{}".format(
+                        settings.DOMAIN,
+                        reverse('api:reservation-detail',
+                                kwargs={"pk": reservation.id}))
+                }
+            )
+            email = EmailMessage(
+                'Flight Reminder for your flight: {}'.format(path),
+                'Prepare for your flight for tomorrow',
+                settings.CONTACT_MAIL,
+                [reservation.user.email],
+                fail_silently=False,
+                html_message=html
+            )
+            if email.send() == 1:
+                print('sent flight reminder to {}'.format(user_name))
+                reservation.sent_reminder = True
+                reservation.save()
+
+        # close the stmp connection
+        smtp_connection.close()
