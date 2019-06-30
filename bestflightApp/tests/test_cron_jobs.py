@@ -32,14 +32,16 @@ class CronTestCase(TestCase):
         self.flight_path = AirlineFlightPathFactory(
             should_reoccur=True, reoccurrence_step=200
         )
-        self.boarding_time = datetime.now(tz=timezone.utc) + timedelta(minutes=100) # noqa
-        take_off_time = datetime.now(tz=timezone.utc) + timedelta(minutes=200)
+        self.boarding_time = datetime.now(tz=timezone.utc) + timedelta(days=1)
+        take_off_time = self.boarding_time + timedelta(minutes=200)
 
-        AvailableFlightFactory(
+        flight = AvailableFlightFactory(
             airlinePath=self.flight_path,
             boarding_time=self.boarding_time,
             take_off_time=take_off_time)
-        self.reservation = ReservationFactory()
+        self.reservation = ReservationFactory(
+            flight=flight
+        )
 
     def test_create_next_available_flights(self):
         create_next_available_flights()

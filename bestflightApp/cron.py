@@ -8,7 +8,7 @@ from django.template import loader
 
 from django.core.mail import (
     get_connection,
-    EmailMessage
+    EmailMultiAlternatives
 )
 
 from bestflightApp.models import (
@@ -93,7 +93,7 @@ def flight_reminder():
             path = reservation.flight.airlinePath
             user_name = reservation.user.first_name if reservation.user.first_name else '' # noqa
             print('sending flight reminder to {}'.format(user_name))
-            html = loader.render_to_string(
+            html_content = loader.render_to_string(
                 'email/flight_reminder.html',
                 {
                     'name': user_name,
@@ -105,15 +105,16 @@ def flight_reminder():
                                 kwargs={"pk": reservation.id}))
                 }
             )
-            email = EmailMessage(
+            email = EmailMultiAlternatives(
                 'Flight Reminder for your flight: {}'.format(path),
                 'Prepare for your flight for tomorrow',
                 settings.CONTACT_MAIL,
                 [reservation.user.email],
-                fail_silently=False,
-                html_message=html
+                reply_to=[settings.CONTACT_MAIL],
             )
-            if email.send() == 1:
+            email.attach_alternative(html_content, "text/html")
+
+            if email.send(fail_silently=False) == 1:
                 print('sent flight reminder to {}'.format(user_name))
                 reservation.sent_reminder = True
                 reservation.save()
