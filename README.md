@@ -69,6 +69,13 @@ To install this project you need the following framework and tools
  - Run migration with `python manage.py migrate`.
  - Start the app with `python manage.py runserver`
 
+
+### How to setup the project with docker
+- Turn on the service via `make up`
+- Run latest migrations `make migrate`
+- use the app
+
+
 ### Running Test
 you can run the test by running
 ```bash

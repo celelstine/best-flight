@@ -3,6 +3,17 @@ activate:
 
 start:
 	python manage.py runserver
+sh:
+	docker-compose exec bestflight bash
+
+shell:
+	docker-compose exec bestflight python manage.py shell
+
+build:
+	docker build . -t bestflight
+
+up:
+	docker-compose up -d
 
 test:
 	python manage.py test -v 2 ${APP}
